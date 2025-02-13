@@ -54,17 +54,24 @@ def columnar_transposition_encrypt(plaintext, key):
 def columnar_transposition_decrypt(ciphertext, key):
     num_cols = len(key)
     num_rows = len(ciphertext) // num_cols
-    grid = ['' for _ in range(num_cols)]
-    
+    if len(ciphertext) % num_cols != 0:
+        num_rows += 1
+
     key_order = sorted(range(len(key)), key=lambda x: key[x])
-    column_size = len(ciphertext) // num_cols
-    for i, col in zip(key_order, range(num_cols)):
-        start = i * column_size
-        end = (i + 1) * column_size
-        grid[i] = ciphertext[start:end]
+
+    col_lengths = [len(ciphertext) // num_cols] * num_cols
+    extra_chars = len(ciphertext) % num_cols
+    for i in range(extra_chars):
+        col_lengths[i] += 1
+
+    grid = ['' for _ in range(num_cols)]
+    index = 0
+    for col in key_order:
+        grid[col] = ciphertext[index:index + col_lengths[col]]
+        index += col_lengths[col]
 
     plaintext = ''
-    for i in range(column_size):
+    for i in range(num_rows):
         for j in range(num_cols):
             if i < len(grid[j]):
                 plaintext += grid[j][i]
